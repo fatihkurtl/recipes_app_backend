@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, status
 from sqlalchemy.orm import Session
-from models.admin import Admin
+from models.admin import Admin, Token
 from dotenv import load_dotenv
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jwt.exceptions import InvalidTokenError
@@ -39,7 +39,6 @@ def create_access_token(data: dict):
 
 
 def create_admin(db: Session, fullname: str, username: str, email: str, password: str):
-    # Şifreyi hash'leyin
     hashed_password = get_password_hash(password)
     
     new_admin = Admin(fullname=fullname, username=username, email=email, hashed_password=hashed_password)
@@ -57,9 +56,17 @@ def create_admin(db: Session, fullname: str, username: str, email: str, password
     return HTTPException(status_code=200, detail="Admin created successfully")
 
 
-def check_admin(email: str, password: str, db: Session):
-    # existing_admin = db.query(Admin).filter(Admin.email == email).first()
-    # if existing_admin and existing_admin.hashed_password == password:  # Assuming plain text for simplicity
-    #     return existing_admin
-    print(email, password)
-    return None
+def authenticate_admin(db: Session, email: str, password: str):
+    admin = db.query(Admin).filter(Admin.email == email).first()
+    if not admin:
+        return HTTPException(status_code=400, detail="Invalid credentials")
+    if not verify_password(password, admin.hashed_password):
+        return HTTPException(status_code=400, detail="Password incorrect")
+    token_save = Token(token=create_access_token({"sub": admin.username}), admin_id=admin.id)
+    if db.query(Token).filter(Token.admin_id == admin.id).first():
+        db.query(Token).filter(Token.admin_id == admin.id).delete()
+        db.commit()
+        db.add(token_save)
+        db.commit()
+    access_token = create_access_token(data={"sub": admin.username})        
+    return HTTPException(status_code=200, detail={"access_token": access_token, "token_type": "bearer"})

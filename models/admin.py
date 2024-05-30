@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, false
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from database.db import Base
@@ -23,8 +23,6 @@ class Token(Base):
     token = Column(String(length=255), nullable=False, unique=True, index=True)
     admin_id = Column(Integer, ForeignKey('admin_table.id'))    
     admin = relationship('Admin', back_populates='token')
-    
-
     
     
 

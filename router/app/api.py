@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from database.db import get_db
-from models.app import AppImages
+from models.app import AppImages, Recipes, Categories
 import os
 import shutil
 from schemas.app_schema import DrawerHeaderLogo, CarouselImages
@@ -22,7 +22,6 @@ async def upload_drawer_logo(file: UploadFile = File(...), db: Session = Depends
         with open(file_location, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
         
-        # Update the database record
         app_images = db.query(AppImages).first()
         if not app_images:
             app_images = AppImages()

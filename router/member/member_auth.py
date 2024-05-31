@@ -18,11 +18,14 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
+
 def get_password_hash(password):
     return pwd_context.hash(password)
 
+
 def get_admin(db: Session, admin_id: int):
     return db.query(Members).filter(Members.id == admin_id).first()
+
 
 def authenticate_admin(db: Session, username: str, password: str):
     admin = db.query(Members).filter(Members.username == username).first()
@@ -32,9 +35,11 @@ def authenticate_admin(db: Session, username: str, password: str):
         return False
     return admin
 
+
 def create_access_token(data: dict):
     to_encode = data.copy()
     return jwt.encode(to_encode, os.getenv("SECRET_KEY"), algorithm=os.getenv("ALGORITHM"))
+
 
 def create_member(db: Session, fullname: str, username: str, email: str, password: str):
     hashed_password = get_password_hash(password)
@@ -52,6 +57,7 @@ def create_member(db: Session, fullname: str, username: str, email: str, passwor
     db.refresh(new_member)
     
     return HTTPException(status_code=200, detail="Member created successfully")
+
 
 def authenticate_member(db: Session, email: str, password: str):
     member = db.query(Members).filter(Members.email == email).first()

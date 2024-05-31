@@ -58,3 +58,4 @@ async def upload_carousel_images(files: list[UploadFile] = File(...), db: Sessio
         raise HTTPException(status_code=400, detail=str(e))
     
     return JSONResponse(status_code=200, content={"message": "Carousel images uploaded successfully"})
+

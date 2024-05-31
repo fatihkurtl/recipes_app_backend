@@ -9,7 +9,9 @@ class Categories(Base):
     __tablename__ = 'categories_table'
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(length=80), nullable=False, unique=True, index=True)
+    name_en = Column(String(length=80), nullable=False, unique=True, index=True)
     description = Column(String, nullable=True)
+    description_en = Column(String, nullable=True)
     recipes = relationship('Recipes', back_populates='category')
     create_at = Column(DateTime, default=datetime.now)
     update_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
@@ -35,9 +37,11 @@ class Categories(Base):
 class Recipes(Base):
     __tablename__ = 'recipes_table'
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String(length=60), nullable=True, unique=True, index=True)
+    title = Column(String(length=80), nullable=True, unique=True, index=True)
+    title_en = Column(String(length=80), nullable=True, unique=True, index=True)
     description = Column(String, nullable=True)
-    image = Column(String(length=255), nullable=True)
+    description_en = Column(String, nullable=True)
+    thumbnail = Column(String(length=255), nullable=True)
     save_count = Column(Integer, default=0, nullable=True)
     popular = Column(Integer, default=False, nullable=True)
     active = Column(Integer, default=True, nullable=True)

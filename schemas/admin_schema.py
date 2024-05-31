@@ -15,3 +15,8 @@ class AdminContactData(BaseModel):
     email: str
     subject: str
     message: str
+class DrawerHeaderLogo(BaseModel):
+    logo: str
+    
+class CarouselImages(BaseModel):
+    images: str

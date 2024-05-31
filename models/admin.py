@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timedelta
 from database.db import Base
 
 
@@ -26,4 +26,26 @@ class Token(Base):
     
     
 
+class Contact(Base):
+    __tablename__ = 'contact_table'
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String(length=60), nullable=False)
+    subject = Column(String(length=200), nullable=False)
+    message = Column(String, nullable=False)
+    create_at = Column(DateTime, default=datetime.now)
+    update_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
     
+    def __repr__(self):
+        return self.email
+    
+    def get_latest_contact(self):
+        return self.create_at > datetime.now() - timedelta(days=7)
+    
+    def get_new_contact(self):
+        return self.create_at > datetime.now() - timedelta(days=1)
+    
+    def get_old_contact(self):
+        return self.create_at < datetime.now() - timedelta(days=1)
+    
+    def get_contact_by_email(self, email: str):
+        return self.email == email

@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from datetime import datetime, timedelta
 from database.db import Base
 
-from .general_app import Recipes
+from .app import Recipes
 
 
 
@@ -22,7 +22,7 @@ class SavedRecipes(Base):
     __tablename__ = 'saved_recipes_table'
     id = Column(Integer, primary_key=True, index=True)
     recipe_id = Column(Integer, ForeignKey('recipes_table.id'))
-    recipe = relationship('Recipes', back_populates='saved_recipes')
+    recipe = relationship(Recipes, back_populates='saved_recipes')
     member_id = Column(Integer, ForeignKey('members_table.id'))
     member = relationship('Members', back_populates='saved_recipes')
     create_at = Column(DateTime, default=datetime.now)

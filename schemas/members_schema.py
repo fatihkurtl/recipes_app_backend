@@ -6,12 +6,6 @@ class RegisterData(BaseModel):
     email: str
     password: str
     
-
 class LoginData(BaseModel):
     email: str
     password: str
-    
-class AdminContactData(BaseModel):
-    email: str
-    subject: str
-    message: str

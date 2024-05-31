@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from datetime import datetime, timedelta
 from database.db import Base
 from sqlalchemy.orm import Session
-
+import json
 
 class Categories(Base):
     __tablename__ = 'categories_table'
@@ -54,3 +54,24 @@ class Recipes(Base):
     def get_popular_recipe(self):
         return self.save_count > 10
     
+
+class AppImages(Base):
+    __tablename__ = 'app_images_table'
+    id = Column(Integer, primary_key=True, index=True)
+    drawer_header_logo = Column(String(length=255), nullable=True)
+    carousel_images = Column(String, nullable=True)
+    create_at = Column(DateTime, default=datetime.now)
+    update_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+    def add_carousel_image(self, image_url: str):
+        if self.carousel_images:
+            images = json.loads(self.carousel_images)
+        else:
+            images = []
+        images.append(image_url)
+        self.carousel_images = json.dumps(images)
+
+    def get_carousel_images(self):
+        if self.carousel_images:
+            return json.loads(self.carousel_images)
+        return []

@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, status
 from sqlalchemy.orm import Session
-from models.admin import Admin, Token
+from models.admin import Admin, Contact, Token
 from dotenv import load_dotenv
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jwt.exceptions import InvalidTokenError
@@ -17,8 +17,10 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
+
 def get_password_hash(password):
     return pwd_context.hash(password)
+
 
 def get_admin(db: Session, admin_id: int):
     return db.query(Admin).filter(Admin.id == admin_id).first()
@@ -70,3 +72,12 @@ def authenticate_admin(db: Session, email: str, password: str):
         db.commit()
     access_token = create_access_token(data={"sub": admin.username})        
     return HTTPException(status_code=200, detail={"access_token": access_token, "token_type": "bearer"})
+
+
+def create_admin_contact(db: Session, email: str, subject: str, message: str):
+    new_contact = Contact(email=email, subject=subject, message=message)
+    db.add(new_contact)
+    db.commit()
+    db.refresh(new_contact)
+    return HTTPException(status_code=200, detail="Contact created successfully")
+

@@ -1,6 +1,7 @@
 from http.client import HTTPException
+import os
 import shutil
-from fastapi import APIRouter, Depends, File, UploadFile
+from fastapi import APIRouter, Depends, File, Form, UploadFile
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from database.db import get_db
@@ -30,7 +31,7 @@ async def contact_admin(contact_data: AdminContactData, db: Session = Depends(ge
     return create_admin_contact(db, contact_data.email, contact_data.subject, contact_data.message)
 
 
-@router.post("/upload/drawer_logo")
+@router.post("/api/upload/drawer_logo")
 async def upload_drawer_logo(file: UploadFile = File(...), db: Session = Depends(get_db)):
     try:
         file_location = f"static/drawer_logo/{file.filename}"
@@ -50,7 +51,7 @@ async def upload_drawer_logo(file: UploadFile = File(...), db: Session = Depends
     return JSONResponse(status_code=200, content={"message": "Drawer logo uploaded successfully"})
 
 
-@router.post("/upload/carousel_images")
+@router.post("/api/upload/carousel_images")
 async def upload_carousel_images(files: list[UploadFile] = File(...), db: Session = Depends(get_db)):
     try:
         file_locations = []
@@ -74,30 +75,54 @@ async def upload_carousel_images(files: list[UploadFile] = File(...), db: Sessio
     return JSONResponse(status_code=200, content={"message": "Carousel images uploaded successfully"})
 
 
-@router.post("/add/recipe")
-async def add_recipe(recipe_data: RecipesCreate, category_id: int, thumbnail_file: UploadFile = File(...), db: Session = Depends(get_db)):
+@router.post("/api/add/recipe")
+async def add_recipe(title: str = Form(...), 
+                     title_en: str = Form(...), 
+                     description: str = Form(...), 
+                     description_en: str = Form(...), 
+                     thumbnail: UploadFile = File(...), 
+                     save_count: int = Form(0), 
+                     popular: bool = Form(False), 
+                     active: bool = Form(True), 
+                     category_name: str = Form(...), 
+                     category_name_en: str = Form(...), 
+                     db: Session = Depends(get_db)):
     try:
-        file_location = f"static/recipe_thumbnails/{thumbnail_file.filename}"
+        filename, file_extension = os.path.splitext(thumbnail.filename)
+        file_location = f"static/recipe_thumbnails/{thumbnail.filename}"
+        print("File Location:", file_location)
+        
+        # Klasörü oluştur
+        os.makedirs(os.path.dirname(file_location), exist_ok=True)
+
         with open(file_location, "wb") as buffer:
-            shutil.copyfileobj(thumbnail_file.file, buffer)
-        recipe_data.thumbnail = file_location
-        
-        recipe = Recipes(**recipe_data.dict(), category_id=category_id)
-        
+            shutil.copyfileobj(thumbnail.file, buffer)
+
+        category = db.query(Categories).filter(Categories.category_name == category_name).first()
+        if not category:
+            category = Categories(category_name=category_name, category_name_en=category_name_en)
+            db.add(category)
+            db.commit()
+            db.refresh(category)
+
+        recipe = Recipes(title=title, 
+                         title_en=title_en, 
+                         description=description, 
+                         description_en=description_en, 
+                         thumbnail_file=file_location, 
+                         save_count=save_count, 
+                         popular=popular, 
+                         active=active, 
+                         category_id=category.id)
+
         if db.query(Recipes).filter(Recipes.title == recipe.title).first():
             raise HTTPException(status_code=400, detail="Recipe title already exists")
-        
-        category = db.query(Categories).filter(Categories.id == category_id).first()
-        if not category:
-            raise HTTPException(status_code=404, detail="Category not found")
-        
-        category.recipes.append(recipe)
-        
+
         db.add(recipe)
         db.commit()
         db.refresh(recipe)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    
+    except FileNotFoundError as e:
+        return JSONResponse(status_code=400, content={"message": str(e)})
     return JSONResponse(status_code=200, content={"message": "Recipe added successfully"})
+
 

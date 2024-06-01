@@ -7,20 +7,31 @@ class RecipesBase(BaseModel):
     title_en: Optional[str]
     description: Optional[str]
     description_en: Optional[str]
-    thumbnail: Optional[str]
+    thumbnail_file: Optional[bytes]
     save_count: Optional[int] = 0
     popular: Optional[bool] = False
     active: Optional[bool] = True
-    category_id: Optional[int]
+    
+    class Config:
+        orm_mode = True
+        from_orm = True
+        validate_assignment = True
+        arbitrary_types_allowed = True
+        populate_by_name = True
+        from_attributes = True
 
 class RecipesCreate(RecipesBase):
-    pass
+    category_name: str
+    category_name_en: str
 
 class RecipesUpdate(RecipesBase):
-    pass
+    category_name: str
+    category_name_en: str
 
 class RecipesInDBBase(RecipesBase):
     id: int
+    category_name: str
+    category_name_en: str
     create_at: Optional[datetime]
     update_at: Optional[datetime]
 
@@ -34,27 +45,46 @@ class Recipes(RecipesInDBBase):
 ############################################
 
 class CategoriesBase(BaseModel):
-    name: str
-    name_en: str
+    id: int
+    category_name: str
+    category_name_en: str
+    description: Optional[str] = None
+    description_en: Optional[str] = None
+    create_at: datetime
+    update_at: datetime
+    
+    class Config:
+        orm_mode = True
+        from_orm = True
+        validate_assignment = True
+        arbitrary_types_allowed = True
+        allow_population_by_field_name = True
+        from_attributes = True
+
+class CategoriesCreate(BaseModel):
+    category_name: str
+    category_name_en: str
     description: Optional[str] = None
     description_en: Optional[str] = None
 
-class CategoriesCreate(CategoriesBase):
-    pass
+class CategoriesUpdate(BaseModel):
+    category_name: Optional[str] = None
+    category_name_en: Optional[str] = None
+    description: Optional[str] = None
+    description_en: Optional[str] = None
 
-class CategoriesUpdate(CategoriesBase):
-    pass
+class CategoriesInDBBase(BaseModel):
+    categories: List[CategoriesBase]
 
-class CategoriesInDBBase(CategoriesBase):
+class CategoriesInResponse(BaseModel):
     id: int
-    recipes: List[Recipes]
-
-    class Config:
-        orm_mode = True
-
-class Categories(CategoriesInDBBase):
+    category_name: str
+    category_name_en: str
+    description: Optional[str] = None
+    description_en: Optional[str] = None
     create_at: Optional[datetime]
     update_at: Optional[datetime]
 
     class Config:
         orm_mode = True
+        from_orm = True

@@ -8,8 +8,8 @@ import json
 class Categories(Base):
     __tablename__ = 'categories_table'
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(length=80), nullable=False, unique=True, index=True)
-    name_en = Column(String(length=80), nullable=False, unique=True, index=True)
+    category_name = Column(String(length=80), nullable=False, unique=True, index=True)
+    category_name_en = Column(String(length=80), nullable=False, unique=True, index=True)
     description = Column(String, nullable=True)
     description_en = Column(String, nullable=True)
     recipes = relationship('Recipes', back_populates='category')
@@ -17,22 +17,22 @@ class Categories(Base):
     update_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
     
     def __repr__(self):
-        return self.name
+        return f"<Category(id={self.id}, category_name={self.category_name})>"
     
     def get_latest_category(self):
         return self.create_at > datetime.now() - timedelta(days=7)
     
-    @staticmethod
-    def get_popular_categories(db: Session, min_save_count: int = 10):
-        popular_categories = (
-            db.query(Categories, func.sum(Recipes.save_count).label('total_saves'))
-            .join(Recipes, Categories.id == Recipes.category_id)
-            .group_by(Categories.id)
-            .having(func.sum(Recipes.save_count) > min_save_count)
-            .order_by(func.sum(Recipes.save_count).desc())
-            .all()
-        )
-        return popular_categories
+    # @staticmethod
+    # def get_popular_categories(db: Session, min_save_count: int = 10):
+    #     popular_categories = (
+    #         db.query(Categories, func.sum(Recipes.save_count).label('total_saves'))
+    #         .join(Recipes, Categories.id == Recipes.category_id)
+    #         .group_by(Categories.id)
+    #         .having(func.sum(Recipes.save_count) > min_save_count)
+    #         .order_by(func.sum(Recipes.save_count).desc())
+    #         .all()
+    #     )
+    #     return popular_categories
 
 class Recipes(Base):
     __tablename__ = 'recipes_table'
@@ -41,11 +41,12 @@ class Recipes(Base):
     title_en = Column(String(length=80), nullable=True, unique=True, index=True)
     description = Column(String, nullable=True)
     description_en = Column(String, nullable=True)
-    thumbnail = Column(String(length=255), nullable=True)
+    thumbnail_file = Column(String(length=255), nullable=True)
     save_count = Column(Integer, default=0, nullable=True)
     popular = Column(Integer, default=False, nullable=True)
     active = Column(Integer, default=True, nullable=True)
     category_id = Column(Integer, ForeignKey('categories_table.id'))
+    category = relationship(Categories, back_populates='recipes')
     create_at = Column(DateTime, default=datetime.now)
     update_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
     

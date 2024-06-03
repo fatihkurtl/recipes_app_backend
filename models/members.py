@@ -8,12 +8,15 @@ from .app import Recipes
 
 
 class MemberToken(Base):
-    __tablename__ = 'token_table'
+    __tablename__ = 'member_token_table'
     id = Column(Integer, primary_key=True, index=True)
     token = Column(String(length=255), nullable=False, unique=True, index=True)
     member_id = Column(Integer, ForeignKey('members_table.id'))    
-    member = relationship('Members', back_populates='token')
+    create_at = Column(DateTime, default=datetime.now)
+    update_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
     
+    member = relationship('Members', back_populates='token')  # MemberToken ve Members arasındaki ilişkiyi belirtiyoruz
+        
     def get_member_token(self):
         return self.token
 
@@ -22,11 +25,11 @@ class SavedRecipes(Base):
     __tablename__ = 'saved_recipes_table'
     id = Column(Integer, primary_key=True, index=True)
     recipe_id = Column(Integer, ForeignKey('recipes_table.id'))
-    recipe = relationship(Recipes, back_populates='saved_recipes')
     member_id = Column(Integer, ForeignKey('members_table.id'))
-    member = relationship('Members', back_populates='saved_recipes')
     create_at = Column(DateTime, default=datetime.now)
     update_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+    
+    member = relationship('Members', back_populates='saved_recipes')
     
     def get_member_id(self):
         return self.member_id
@@ -46,7 +49,8 @@ class Members(Base):
     create_at = Column(DateTime, default=datetime.now)
     update_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
     
-    token = relationship('MemberToken', back_populates='members')
+    token = relationship('MemberToken', back_populates='member')  # MemberToken ve Members arasındaki ilişkiyi belirtiyoruz
+    saved_recipes = relationship('SavedRecipes', back_populates='member')  # SavedRecipes ve Members arasındaki ilişkiyi belirtiyoruz
     
     def get_token(self):
         return self.token

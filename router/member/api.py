@@ -7,18 +7,17 @@ from schemas.members_schema import LoginData, RegisterData
 
 
 router = APIRouter(
-    prefix="/member",
+    prefix="/member/api",
     tags=["member"],
     responses={404: {"description": "Not found"}},    
 )
 
-@router.post("/api/register")
+@router.post("/register")
 async def register_member(register_data: RegisterData, db: Session = Depends(get_db)):
     return create_member(db, register_data.fullname, register_data.username, register_data.email, register_data.password)
 
-@router.post("/api/login")
+
+@router.post("/login")
 async def login_member(login_data: LoginData, db: Session = Depends(get_db)):
     return authenticate_member(db, login_data.email, login_data.password)
-
-
 

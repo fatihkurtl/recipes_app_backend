@@ -16,7 +16,6 @@ def get_create_recipe(db: Session, title: str, title_en: str, description: str, 
         file_location = f"static/recipe_thumbnails/{thumbnail.filename}"
         print("File Location:", file_location)
         
-        # Klasörü oluştur
         os.makedirs(os.path.dirname(file_location), exist_ok=True)
 
         with open(file_location, "wb") as buffer:

@@ -76,6 +76,9 @@ def get_upload_carouesel_images(files: list[UploadFile], db: Session):
 def get_upload_drawer_logo(file: UploadFile, db: Session):
     try:
         file_location = f"static/drawer_logo/{file.filename}"
+        
+        os.makedirs(os.path.dirname(file_location), exist_ok=True)
+
         with open(file_location, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
         

@@ -55,6 +55,9 @@ def get_upload_carouesel_images(files: list[UploadFile], db: Session):
         file_locations = []
         for file in files:
             file_location = f"static/carousel_images/{file.filename}"
+            
+            os.makedirs(os.path.dirname(file_location), exist_ok=True)
+
             with open(file_location, "wb") as buffer:
                 shutil.copyfileobj(file.file, buffer)
             file_locations.append(file_location)

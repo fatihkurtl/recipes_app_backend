@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from models.app import AppImages, Categories, Recipes
 from models.members import Members
+from schemas.app_schema import CategoriesBase
 from schemas.members_schema import MemberBase
 
 
@@ -106,3 +107,14 @@ def get_all_members(db: Session, skip: int = 0, limit: int = 10):
         raise HTTPException(status_code=400, detail=str(e))
     
     return [MemberBase.from_orm(member) for member in members]
+
+
+def get_all_categories(db: Session):
+    try:
+        categories = db.query(Categories).all()
+        if not categories:
+            raise HTTPException(status_code=404, detail="No categories found")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+    return [CategoriesBase.from_orm(category) for category in categories]

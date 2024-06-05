@@ -8,17 +8,19 @@ from sqlalchemy.orm import Session
 from database.db import get_db
 from models.app import AppImages, Recipes, Categories
 from models.members import Members
-from router.admin.admin_crud import get_all_members, get_create_recipe, get_upload_carouesel_images, get_upload_drawer_logo
+from router.admin.admin_crud import get_all_categories, get_all_members, get_create_recipe, get_upload_carouesel_images, get_upload_drawer_logo
 from schemas.members_schema import Member
 from .admin_auth import authenticate_admin, create_admin, create_admin_contact
 from schemas.admin_schema import LoginData, RegisterData, AdminContactData
 from schemas.app_schema import RecipesBase, CategoriesBase, RecipesCreate
+
 
 router = APIRouter(
     prefix="/admin/api",
     tags=["admin"],
     responses={404: {"description": "Not found"}},    
 )
+
 
 @router.post("/register")
 async def register_admin(register_data: RegisterData, db: Session = Depends(get_db)):
@@ -63,4 +65,9 @@ async def add_recipe(title: str = Form(...),
 @router.get("/all/members", response_model=List[Member])
 async def get_members(db: Session = Depends(get_db), skip: int = 0, limit: int = 10):
     return get_all_members(db, skip, limit)
+
+
+@router.get("/all/categories", response_model=List[CategoriesBase])
+async def categories(db: Session = Depends(get_db)):
+    return get_all_categories(db)
     

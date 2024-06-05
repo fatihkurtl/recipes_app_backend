@@ -29,8 +29,8 @@ def get_all_recipes(db: Session, skip, limit, title=None, description=None, cate
         if category:
             query = query.join(Categories).filter(Categories.category_name_en == category)
         
-        recipes = query.offset(skip).limit(limit).all()
-        
+        recipes = query.offset(skip).limit(limit).all()        
+                
         if not recipes:
             raise HTTPException(status_code=404, detail="No recipes found")
     except Exception as e:
